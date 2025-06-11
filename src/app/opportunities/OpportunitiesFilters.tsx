@@ -10,10 +10,12 @@ interface OpportunitiesFiltersProps {
   locations: Location[]
   stages: string[]
   types: string[]
+  sources: string[]
   onFilterChange: (filters: {
     location: string
     stage: string
     type: string
+    source: string
     startDate: string
     endDate: string
   }) => void
@@ -23,12 +25,14 @@ export default function OpportunitiesFilters({
   locations,
   stages,
   types,
+  sources,
   onFilterChange
 }: OpportunitiesFiltersProps) {
   const [filters, setFilters] = useState({
     location: '',
     stage: '',
     type: '',
+    source: '',
     startDate: '',
     endDate: ''
   })
@@ -98,6 +102,26 @@ export default function OpportunitiesFilters({
             {types.map((type) => (
               <option key={type} value={type}>
                 {type}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Filtros de Fuente */}
+        <div className="flex flex-col">
+          <label htmlFor="source" className="mb-1 text-sm font-medium text-gray-700">
+            Fuente
+          </label>
+          <select
+            id="source"
+            value={filters.source}
+            onChange={(e) => handleFilterChange('source', e.target.value)}
+            className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          >
+            <option value="">Todas</option>
+            {sources.map((source) => (
+              <option key={source} value={source}>
+                {source}
               </option>
             ))}
           </select>

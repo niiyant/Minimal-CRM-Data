@@ -4,6 +4,7 @@ export interface Contact {
   email: string;
   phone: string;
   location_name: string;
+  country: string;
   contact_created_date: string;
   created_at: string;
   updated_at: string;

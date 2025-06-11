@@ -33,17 +33,17 @@ const OpportunitiesTable = ({ data = [] }: OpportunitiesTableProps) => {
   }
 
   const uniqueLocations = useMemo(() => 
-    Array.from(new Set(data.map(opp => opp.location).filter(Boolean))),
+    Array.from(new Set(data.map(opp => opp.location).filter(Boolean))).filter((loc): loc is string => loc !== null),
     [data]
   )
 
   const uniqueStages = useMemo(() => 
-    Array.from(new Set(data.map(opp => opp.pipeline_stage).filter(Boolean))),
+    Array.from(new Set(data.map(opp => opp.pipeline_stage).filter(Boolean))).filter((stage): stage is string => stage !== null),
     [data]
   )
 
   const uniqueTypes = useMemo(() => 
-    Array.from(new Set(data.map(opp => opp.tipo_campaña).filter(Boolean))),
+    Array.from(new Set(data.map(opp => opp.tipo_campaña).filter(Boolean))).filter((type): type is string => type !== null),
     [data]
   )
 

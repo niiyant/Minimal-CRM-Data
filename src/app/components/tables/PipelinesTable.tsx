@@ -32,12 +32,12 @@ const PipelinesTable = ({ data = [] }: PipelinesTableProps) => {
   }
 
   const uniqueLocations = useMemo(() => 
-    Array.from(new Set(data.map(pipeline => pipeline.location_name).filter(Boolean))),
+    Array.from(new Set(data.map(pipeline => pipeline.location_name).filter(Boolean))).filter((loc): loc is string => loc !== null),
     [data]
   )
 
   const uniqueStages = useMemo(() => 
-    Array.from(new Set(data.map(pipeline => pipeline.pipeline_stage).filter(Boolean))),
+    Array.from(new Set(data.map(pipeline => pipeline.pipeline_stage).filter(Boolean))).filter((stage): stage is string => stage !== null),
     [data]
   )
 
