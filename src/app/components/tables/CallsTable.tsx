@@ -17,6 +17,12 @@ interface CallsTableProps {
   data: Call[]
 }
 
+// Función para parsear fechas del input como locales
+function parseLocalDate(dateString: string): Date {
+  const [year, month, day] = dateString.split('-').map(Number);
+  return new Date(year, month - 1, day, 0, 0, 0, 0);
+}
+
 const CallsTable = ({ data = [] }: CallsTableProps) => {
   const [sorting, setSorting] = useState<SortingState>([])
   const [pageSize, setPageSize] = useState(10)
@@ -52,8 +58,32 @@ const CallsTable = ({ data = [] }: CallsTableProps) => {
       if (filters.location && call.location_name !== filters.location) return false
       if (filters.status && call.phone_call_status !== filters.status) return false
       if (filters.type && call.phone_direction !== filters.type) return false
-      if (filters.startDate && call.created_at && new Date(call.created_at) < new Date(filters.startDate)) return false
-      if (filters.endDate && call.created_at && new Date(call.created_at) > new Date(filters.endDate)) return false
+      
+      // Filtros de fecha inicio y fin independientes
+      if (filters.startDate || filters.endDate) {
+        const callStart = call.phone_start_time ? new Date(call.phone_start_time) : null;
+        const callEnd = call.phone_end_time ? new Date(call.phone_end_time) : callStart;
+        const rangeStart = filters.startDate ? parseLocalDate(filters.startDate) : null;
+        const rangeEnd = filters.endDate ? parseLocalDate(filters.endDate) : null;
+
+        if (callStart) callStart.setHours(0,0,0,0);
+        if (callEnd) callEnd.setHours(0,0,0,0);
+        if (rangeStart) rangeStart.setHours(0,0,0,0);
+        if (rangeEnd) rangeEnd.setHours(0,0,0,0);
+
+        // Solo fecha inicio seleccionada
+        if (rangeStart && !rangeEnd && callStart) {
+          if (callStart < rangeStart) return false;
+        }
+        // Solo fecha fin seleccionada
+        if (!rangeStart && rangeEnd && callEnd) {
+          if (callEnd > rangeEnd) return false;
+        }
+        // Ambas fechas seleccionadas
+        if (rangeStart && rangeEnd && callStart && callEnd) {
+          if (callStart < rangeStart || callEnd > rangeEnd) return false;
+        }
+      }
       return true
     }),
     [data, filters]
@@ -77,10 +107,18 @@ const CallsTable = ({ data = [] }: CallsTableProps) => {
       header: 'Ubicación',
     },
     {
-      accessorKey: 'created_at',
-      header: 'Fecha',
+      accessorKey: 'phone_start_time',
+      header: 'Fecha Inicio',
       cell: ({ row }) => {
-        const date = row.original.created_at
+        const date = row.original.phone_start_time
+        return date ? new Date(date).toLocaleString('es-ES') : '-'
+      },
+    },
+    {
+      accessorKey: 'phone_end_time',
+      header: 'Fecha Fin',
+      cell: ({ row }) => {
+        const date = row.original.phone_end_time
         return date ? new Date(date).toLocaleString('es-ES') : '-'
       },
     },
@@ -232,8 +270,9 @@ const CallsTable = ({ data = [] }: CallsTableProps) => {
           <select
             value={pageSize}
             onChange={e => {
-              setPageSize(Number(e.target.value))
-              table.setPageIndex(0)
+              setPageSize(Number(e.target.value));
+              table.setPageSize(Number(e.target.value));
+              table.setPageIndex(0);
             }}
             className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           >

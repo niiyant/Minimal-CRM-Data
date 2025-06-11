@@ -27,6 +27,12 @@ interface CallsClientProps {
   contactCreationDates: Record<string, string>;
 }
 
+// Función para parsear fechas del input como locales
+function parseLocalDate(dateString: string): Date {
+  const [year, month, day] = dateString.split('-').map(Number);
+  return new Date(year, month - 1, day, 0, 0, 0, 0);
+}
+
 export default function CallsClient({ initialCalls, contactCreationDates }: CallsClientProps) {
   const [calls] = useState<Call[]>(initialCalls)
   const [filters, setFilters] = useState({
@@ -65,8 +71,33 @@ export default function CallsClient({ initialCalls, contactCreationDates }: Call
   // Filtrar llamadas según los criterios
   const filteredCalls = calls.filter(call => {
     if (filters.location && call.location_name !== filters.location) return false
-    if (filters.startDate && call.phone_start_time && new Date(call.phone_start_time) < new Date(filters.startDate)) return false
-    if (filters.endDate && call.phone_start_time && new Date(call.phone_start_time) > new Date(filters.endDate)) return false
+    
+    // Filtros de fecha inicio y fin independientes, usando fechas locales
+    if (filters.startDate || filters.endDate) {
+      const callStart = call.phone_start_time ? new Date(call.phone_start_time) : null;
+      const callEnd = call.phone_end_time ? new Date(call.phone_end_time) : callStart;
+      const rangeStart = filters.startDate ? parseLocalDate(filters.startDate) : null;
+      const rangeEnd = filters.endDate ? parseLocalDate(filters.endDate) : null;
+
+      if (callStart) callStart.setHours(0,0,0,0);
+      if (callEnd) callEnd.setHours(0,0,0,0);
+      if (rangeStart) rangeStart.setHours(0,0,0,0);
+      if (rangeEnd) rangeEnd.setHours(0,0,0,0);
+
+      // Solo fecha inicio seleccionada
+      if (rangeStart && !rangeEnd && callStart) {
+        if (callStart < rangeStart) return false;
+      }
+      // Solo fecha fin seleccionada
+      if (!rangeStart && rangeEnd && callEnd) {
+        if (callEnd > rangeEnd) return false;
+      }
+      // Ambas fechas seleccionadas
+      if (rangeStart && rangeEnd && callStart && callEnd) {
+        if (callStart < rangeStart || callEnd > rangeEnd) return false;
+      }
+    }
+    
     return true
   })
 
@@ -308,6 +339,7 @@ export default function CallsClient({ initialCalls, contactCreationDates }: Call
       {/* Filtros */}
       <CallsFilters 
         locations={uniqueLocations} 
+        filters={filters}
         onFilterChange={setFilters}
       />
 
@@ -400,7 +432,10 @@ export default function CallsClient({ initialCalls, contactCreationDates }: Call
                   Ubicación
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Fecha
+                  Fecha Inicio
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  Fecha Fin
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                   Duración ({getTimeUnitLabel()})
@@ -425,6 +460,11 @@ export default function CallsClient({ initialCalls, contactCreationDates }: Call
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
                     {call.phone_start_time
                       ? new Date(call.phone_start_time).toLocaleString('es-ES')
+                      : '-'}
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                    {call.phone_end_time
+                      ? new Date(call.phone_end_time).toLocaleString('es-ES')
                       : '-'}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">

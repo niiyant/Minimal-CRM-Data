@@ -2,6 +2,11 @@
 
 interface CallsFiltersProps {
   locations: { location_name: string }[]
+  filters: {
+    location: string
+    startDate: string
+    endDate: string
+  }
   onFilterChange: (filters: {
     location: string
     startDate: string
@@ -11,9 +16,9 @@ interface CallsFiltersProps {
 
 type FilterKey = 'location' | 'startDate' | 'endDate'
 
-export default function CallsFilters({ locations, onFilterChange }: CallsFiltersProps) {
+export default function CallsFilters({ locations, filters, onFilterChange }: CallsFiltersProps) {
   const handleFilterChange = (key: FilterKey, value: string) => {
-    onFilterChange({ [key]: value } as { [K in FilterKey]: string })
+    onFilterChange({ ...filters, [key]: value })
   }
 
   return (
@@ -26,6 +31,7 @@ export default function CallsFilters({ locations, onFilterChange }: CallsFilters
           </label>
           <select
             id="location"
+            value={filters.location}
             onChange={(e) => handleFilterChange('location', e.target.value)}
             className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
@@ -45,6 +51,7 @@ export default function CallsFilters({ locations, onFilterChange }: CallsFilters
           <input
             type="date"
             id="startDate"
+            value={filters.startDate}
             onChange={(e) => handleFilterChange('startDate', e.target.value)}
             className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
@@ -57,6 +64,7 @@ export default function CallsFilters({ locations, onFilterChange }: CallsFilters
           <input
             type="date"
             id="endDate"
+            value={filters.endDate}
             onChange={(e) => handleFilterChange('endDate', e.target.value)}
             className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />

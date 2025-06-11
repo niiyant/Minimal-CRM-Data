@@ -4,6 +4,7 @@ export interface Call {
   full_name: string;
   location_name: string;
   phone_start_time: string;
+  phone_end_time: string;
   phone_duration: number;
   phone_call_status: string;
   phone_direction: "inbound" | "outbound";
